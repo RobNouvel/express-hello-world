@@ -59,3 +59,43 @@ const html = `
   </body>
 </html>
 `
+
+
+
+
+
+// const express = require('express');
+const http = require('http');
+const socketio = require('socket.io');
+
+// const app = express();
+const serverSocket = http.createServer(app);
+const io = socketio(serverSocket);
+
+// Example game state (replace with your Catan game logic)
+let gameState = {
+  board: [],
+  players: [],
+  resources: {},
+};
+
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/index.html');
+});
+
+io.on('connection', (socket) => {
+  console.log('Player connected');
+
+  socket.on('join_game', (data) => {
+    gameState.players.push(data.playerName);
+    io.emit('game_update', gameState);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Player disconnected');
+  });
+});
+
+serverSocket.listen(3000, () => {
+  console.log('Server listening on port 3000');
+});
